@@ -3,28 +3,20 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\V1\NoteIndexRequest;
 use App\Http\Requests\Api\V1\NoteRequest;
 use App\Http\Resources\Api\V1\NoteResource;
-use App\Http\Resources\Api\V1\NoteResourceCollection;
 use App\Services\NoteService;
 
 class NoteController extends Controller
 {
-    protected NoteService $noteService;
+    protected $noteService;
 
     public function __construct(NoteService $noteService)
     {
         $this->noteService = $noteService;
     }
 
-    public function index(NoteIndexRequest $request): NoteResourceCollection
-    {
-        $notes = $this->noteService->getNotes($request->validated());
-        return new NoteResourceCollection($notes);
-    }
-
-    public function store(NoteRequest $request): NoteResource
+    public function store(NoteRequest $request)
     {
         $note = $this->noteService->createNote($request->validated());
         return new NoteResource($note);
