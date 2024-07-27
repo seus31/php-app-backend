@@ -6,24 +6,11 @@ use App\Repositories\NoteRepository;
 
 class NoteService
 {
-    protected NoteRepository $noteRepository;
+    protected $noteRepository;
 
     public function __construct(NoteRepository $noteRepository)
     {
         $this->noteRepository = $noteRepository;
-    }
-
-    public function getNotes(array $noteIndexConditions)
-    {
-        if (empty($noteIndexConditions['page'])) {
-            $noteIndexConditions['page'] = config('const.pagination.page');
-        }
-
-        if (empty($noteIndexConditions['per_page'])) {
-            $noteIndexConditions['per_page'] = config('const.pagination.per_page');
-        }
-
-        return $this->noteRepository->getNotes($noteIndexConditions);
     }
 
     public function createNote(array $note)
