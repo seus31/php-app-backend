@@ -7,6 +7,7 @@ use App\Http\Requests\Api\V1\NoteIndexRequest;
 use App\Http\Requests\Api\V1\NoteRequest;
 use App\Http\Resources\Api\V1\NoteResource;
 use App\Http\Resources\Api\V1\NoteResourceCollection;
+use App\Models\Note;
 use App\Services\NoteService;
 
 class NoteController extends Controller
@@ -27,6 +28,11 @@ class NoteController extends Controller
     public function store(NoteRequest $request): NoteResource
     {
         $note = $this->noteService->createNote($request->validated());
+        return new NoteResource($note);
+    }
+
+    public function show(Note $note): NoteResource
+    {
         return new NoteResource($note);
     }
 }
