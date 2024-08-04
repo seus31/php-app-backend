@@ -30,4 +30,9 @@ class NoteService
     {
         return $this->noteRepository->create($note);
     }
+
+    public function getNote(int $noteId)
+    {
+        return $this->noteRepository->getNoteById($noteId);
+    }
 }
