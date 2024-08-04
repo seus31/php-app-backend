@@ -15,4 +15,9 @@ class NoteRepository
     {
         return Note::create($note);
     }
+
+    public function getNoteById(int $noteId)
+    {
+        return Note::find($noteId);
+    }
 }
