@@ -20,4 +20,11 @@ class NoteRepository
     {
         return Note::find($noteId);
     }
+
+    public function update(Note $note, array $updateNote)
+    {
+        $note->body = $updateNote['body'];
+        $note->save();
+        return $note;
+    }
 }
