@@ -35,4 +35,10 @@ class NoteController extends Controller
     {
         return new NoteResource($note);
     }
+
+    public function update(NoteRequest $request, Note $note): NoteResource
+    {
+        $note = $this->noteService->updateNote($note, $request->validated());
+        return new NoteResource($note);
+    }
 }
