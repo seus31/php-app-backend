@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Note;
 use App\Repositories\NoteRepository;
 
 class NoteService
@@ -34,5 +35,10 @@ class NoteService
     public function getNote(int $noteId)
     {
         return $this->noteRepository->getNoteById($noteId);
+    }
+
+    public function updateNote(Note $note, array $noteData)
+    {
+        return $this->noteRepository->update($note, $noteData);
     }
 }
