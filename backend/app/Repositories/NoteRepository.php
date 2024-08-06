@@ -27,4 +27,9 @@ class NoteRepository
         $note->save();
         return $note;
     }
+
+    public function delete(Note $note)
+    {
+        $note->delete();
+    }
 }

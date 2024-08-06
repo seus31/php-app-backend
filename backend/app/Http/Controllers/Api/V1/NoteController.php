@@ -9,6 +9,8 @@ use App\Http\Resources\Api\V1\NoteResource;
 use App\Http\Resources\Api\V1\NoteResourceCollection;
 use App\Models\Note;
 use App\Services\NoteService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class NoteController extends Controller
 {
@@ -40,5 +42,10 @@ class NoteController extends Controller
     {
         $note = $this->noteService->updateNote($note, $request->validated());
         return new NoteResource($note);
+    }
+
+    public function destroy(Request $request, Note $note): JsonResponse
+    {
+        return $this->noteService->deleteNote($note);
     }
 }
