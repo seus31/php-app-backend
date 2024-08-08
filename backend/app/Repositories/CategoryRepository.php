@@ -10,4 +10,9 @@ class CategoryRepository
     {
         return Category::create($category);
     }
+
+    public function getCategories(array $categoryIndexConditions)
+    {
+        return Category::paginate($categoryIndexConditions['per_page'], ['*'], 'page', $categoryIndexConditions['page']);
+    }
 }
