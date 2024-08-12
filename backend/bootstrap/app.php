@@ -12,12 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-//        $middleware->group('api', [
-//            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
-//            \Illuminate\Routing\Middleware\SubstituteBindings::class,
-//        ]);
-//
-//        $middleware->throttleApi();
+        $middleware->group('api', [
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ]);
+
+        $middleware->throttleApi();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
