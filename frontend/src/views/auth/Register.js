@@ -1,23 +1,37 @@
-import React, { useState } from "react";
-import { Link, Redirect } from "react-router-dom";
-import { useAuth } from "../../providers/AuthContext";
+import React, { useState } from 'react';
+import { Link, Redirect } from 'react-router-dom';
+import { useAuth } from '../../providers/AuthContext';
+import {useApi} from "../../providers/ApiContext";
+import axios from "axios";
 
 export default function Register() {
+  const apiUrl = useApi();
+  const apiEndpoint = apiUrl + '/register'
   const [ userName, setUserName ] = useState('');
   const [ email, setEmail ] = useState('');
   const [ password, setPassword ] = useState('');
+  const [ passwordConfirmation, setPasswordConfirmation ] = useState('');
   const [ error, setError ] = useState('');
-  const { token, logout } = useAuth();
+  const { token, login, logout } = useAuth();
 
-  const submitRegister = async () => {
+  if (token) {
+    return <Redirect to="/admin/dashboard" />;
+  }
+
+  const submitRegister = async (e) => {
+    e.preventDefault()
     try {
-      const userData = await loginUser(username, password);
-      navigate('/dashboard');
-      const response = await axios.post('https://api.example.com/login', {
-        username,
-        password
+      const response = await axios.post(apiEndpoint, {
+        name: userName,
+        email: email,
+        password: password,
+        password_confirmation: passwordConfirmation
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      localStorage.setItem('token', userData.token);
+      login(response.data.access_token)
     } catch (error) {
       setError('Login failed. Please check your credentials.');
     }
@@ -69,6 +83,17 @@ export default function Register() {
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="relative w-full mb-3">
+                    <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2">Password Confirm</label>
+                    <input
+                      type="password"
+                      className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                      placeholder="Password Confirm"
+                      value={passwordConfirmation}
+                      onChange={(e) => setPasswordConfirmation(e.target.value)}
                     />
                   </div>
 
