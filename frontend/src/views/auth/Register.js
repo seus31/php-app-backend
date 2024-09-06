@@ -37,10 +37,6 @@ export default function Register() {
     }
   };
 
-  if (token) {
-    return <Redirect to="/admin/dashboard" />;
-  }
-
   return (
     <>
       <div className="container mx-auto px-4 h-full">
