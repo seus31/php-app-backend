@@ -9,7 +9,7 @@ import { ApiProvider } from "./providers/ApiContext";
 import { AuthProvider } from "./providers/AuthContext";
 
 const root = createRoot(document.getElementById("root"));
-const apiUrl = 'http://localhost:8181/api/v1'
+const apiUrl = process.env.REACT_APP_API_BASE_URL
 
 root.render(
   <ApiProvider apiUrl={apiUrl}>
