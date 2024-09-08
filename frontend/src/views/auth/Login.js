@@ -1,8 +1,8 @@
 import axios from 'axios'
-import React, { useState } from "react";
-import { Link, Redirect } from "react-router-dom";
-import { useApi } from "../../providers/ApiContext";
-import { useAuth } from "../../providers/AuthContext";
+import React, { useState } from 'react'
+import { Link, Redirect } from 'react-router-dom'
+import { useApi } from '../../providers/ApiContext'
+import { useAuth } from '../../providers/AuthContext'
 
 export default function Login() {
   const apiUrl = useApi();
