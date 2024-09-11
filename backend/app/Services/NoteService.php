@@ -46,6 +46,6 @@ class NoteService
     {
         $this->noteRepository->delete($note);
 
-        return response()->json(['message' => 'Note deleted successfully'], 200);
+        return response()->json(['message' => 'Note deleted successfully']);
     }
 }
