@@ -414,4 +414,111 @@ class AuthControllerTest extends TestCase
                 'token_type'
             ]);
     }
+
+    public function test_logout_returns_200_and_success_message_for_valid_user()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/v1/logout');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Logged out successfully'
+            ]);
+    }
+
+    public function test_logout_deletes_current_access_token()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        $this->actingAs($user);
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_id' => $user->id,
+            'tokenable_type' => User::class,
+        ]);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/v1/logout');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Logged out successfully'
+            ]);
+    }
+
+    public function test_logout_returns_401_for_invalid_token()
+    {
+        $invalidToken = 'invalid_token_string';
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $invalidToken,
+        ])->postJson('/api/v1/logout');
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Unauthenticated.'
+            ]);
+    }
+
+    public function test_logout_handles_request_when_user_has_no_active_tokens()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $user->tokens()->delete();
+
+        $response = $this->postJson('/api/v1/logout');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Logged out successfully'
+            ]);
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_logout_returns_correct_response_structure()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/v1/logout');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure(['message'])
+            ->assertJson([
+                'message' => 'Logged out successfully'
+            ]);
+    }
+
+    public function test_logout_handles_request_for_nonexistent_user()
+    {
+        $nonExistentUserId = 9999;
+        $fakeToken = 'fake_token_123';
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $fakeToken,
+        ])->postJson('/api/v1/logout');
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Unauthenticated.'
+            ]);
+
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_id' => $nonExistentUserId,
+            'tokenable_type' => User::class,
+        ]);
+    }
 }
