@@ -192,4 +192,226 @@ class AuthControllerTest extends TestCase
 
         $this->assertEquals(1, $user->tokens()->count());
     }
+
+    public function test_login_validates_email_format()
+    {
+        $response = $this->postJson('/api/v1/login', [
+            'email' => 'invalid-email',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_login_returns_422_when_email_is_missing()
+    {
+        $response = $this->postJson('/api/v1/login', [
+            'password' => 'password123'
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_login_returns_422_when_password_is_missing()
+    {
+        $response = $this->postJson('/api/v1/login', [
+            'email' => 'test@example.com'
+        ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_login_returns_422_with_error_message_for_incorrect_credentials()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('correctpassword'),
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'email' => 'test@example.com',
+            'password' => 'incorrectpassword',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => 'The provided credentials are incorrect.'
+            ]);
+    }
+
+
+    public function test_login_authenticates_user_with_correct_credentials()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('correctpassword'),
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'email' => 'test@example.com',
+            'password' => 'correctpassword',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'access_token',
+                'token_type'
+            ])
+            ->assertJson([
+                'token_type' => 'Bearer'
+            ]);
+
+        $this->assertNotEmpty($response->json('access_token'));
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_type' => User::class,
+            'tokenable_id' => $user->id,
+            'name' => 'auth_token'
+        ]);
+    }
+
+    public function test_login_returns_json_response_with_access_token_and_token_type_for_successful_login()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'access_token',
+                'token_type'
+            ])
+            ->assertJson([
+                'token_type' => 'Bearer'
+            ]);
+
+        $this->assertNotEmpty($response->json('access_token'));
+    }
+
+    public function test_login_creates_new_personal_access_token_for_user()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'access_token',
+                'token_type'
+            ]);
+
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_type' => User::class,
+            'tokenable_id' => $user->id,
+            'name' => 'auth_token'
+        ]);
+
+        $this->assertEquals(1, $user->tokens()->count());
+    }
+
+    public function test_login_returns_bearer_as_token_type()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'access_token',
+                'token_type'
+            ])
+            ->assertJson([
+                'token_type' => 'Bearer'
+            ]);
+    }
+
+    public function test_login_does_not_create_token_for_failed_authentication()
+    {
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => Hash::make('correctpassword'),
+        ]);
+
+        $response = $this->postJson('/api/v1/login', [
+            'email' => 'test@example.com',
+            'password' => 'wrongpassword',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => 'The provided credentials are incorrect.'
+            ]);
+
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_type' => User::class,
+            'tokenable_id' => $user->id,
+            'name' => 'auth_token'
+        ]);
+
+        $this->assertEquals(0, $user->tokens()->count());
+    }
+
+    public function test_login_handles_case_sensitive_email_addresses_correctly()
+    {
+        $email = 'Test@Example.com';
+        $password = 'password123';
+
+        User::factory()->create([
+            'email' => $email,
+            'password' => Hash::make($password),
+        ]);
+
+        // Attempt login with lowercase email
+        $response = $this->postJson('/api/v1/login', [
+            'email' => strtolower($email),
+            'password' => $password,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'access_token',
+                'token_type'
+            ]);
+
+        // Attempt login with uppercase email
+        $response = $this->postJson('/api/v1/login', [
+            'email' => strtoupper($email),
+            'password' => $password,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'access_token',
+                'token_type'
+            ]);
+
+        // Attempt login with mixed case email
+        $response = $this->postJson('/api/v1/login', [
+            'email' => $email,
+            'password' => $password,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'access_token',
+                'token_type'
+            ]);
+    }
 }
