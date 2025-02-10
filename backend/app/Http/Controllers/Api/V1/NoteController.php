@@ -23,13 +23,13 @@ class NoteController extends Controller
 
     public function index(NoteIndexRequest $request): NoteResourceCollection
     {
-        $notes = $this->noteService->getNotes($request->validated());
+        $notes = $this->noteService->getNotes($request->validated(), $request->user()->id);
         return new NoteResourceCollection($notes);
     }
 
     public function store(NoteRequest $request): NoteResource
     {
-        $note = $this->noteService->createNote($request->validated());
+        $note = $this->noteService->createNote($request->validated(), $request->user()->id);
         return new NoteResource($note);
     }
 

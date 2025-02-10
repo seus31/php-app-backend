@@ -23,6 +23,8 @@ class NoteRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'category_id' => 'required|numeric',
+            'title' => 'required|string',
             'body' => 'required|string'
         ];
     }

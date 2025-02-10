@@ -14,7 +14,7 @@ class NoteService
         $this->noteRepository = $noteRepository;
     }
 
-    public function getNotes(array $noteIndexConditions)
+    public function getNotes(array $noteIndexConditions, int $userId)
     {
         if (empty($noteIndexConditions['page'])) {
             $noteIndexConditions['page'] = config('const.pagination.page');
@@ -24,11 +24,12 @@ class NoteService
             $noteIndexConditions['per_page'] = config('const.pagination.per_page');
         }
 
-        return $this->noteRepository->getNotes($noteIndexConditions);
+        return $this->noteRepository->getNotes($noteIndexConditions, $userId);
     }
 
-    public function createNote(array $note)
+    public function createNote(array $note, int $userId)
     {
+        $note['user_id'] = $userId;
         return $this->noteRepository->create($note);
     }
 

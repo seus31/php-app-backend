@@ -23,7 +23,6 @@ class NoteIndexRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|numeric',
             'per_page' => 'nullable|numeric',
             'page' => 'nullable|numeric'
         ];

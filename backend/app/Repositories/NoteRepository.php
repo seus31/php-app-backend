@@ -6,9 +6,9 @@ use App\Models\Note;
 
 class NoteRepository
 {
-    public function getNotes(array $noteIndexConditions)
+    public function getNotes(array $noteIndexConditions, int $userId)
     {
-        return Note::paginate($noteIndexConditions['per_page'], ['*'], 'page', $noteIndexConditions['page']);
+        return Note::where('user_id', $userId)->paginate($noteIndexConditions['per_page'], ['*'], 'page', $noteIndexConditions['page']);
     }
 
     public function create(array $note)
