@@ -20,13 +20,13 @@ class CategoryController extends Controller
 
     public function store(CategoryRequest $request): CategoryResource
     {
-        $category = $this->categoryService->createCategory($request->validated());
+        $category = $this->categoryService->createCategory($request->validated(), $request->user()->id);
         return new CategoryResource($category);
     }
 
     public function index(CategoryIndexRequest $request): CategoryResourceCollection
     {
-        $categories = $this->categoryService->getCategories($request->validated());
+        $categories = $this->categoryService->getCategories($request->validated(), $request->user()->id);
         return new CategoryResourceCollection($categories);
     }
 }
