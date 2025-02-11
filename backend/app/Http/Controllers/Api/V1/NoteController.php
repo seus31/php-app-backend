@@ -44,8 +44,8 @@ class NoteController extends Controller
         return new NoteResource($note);
     }
 
-    public function destroy(Request $request, Note $note): JsonResponse
+    public function destroy(Request $request, int $noteId): JsonResponse
     {
-        return $this->noteService->deleteNote($note);
+        return $this->noteService->deleteNote($noteId);
     }
 }

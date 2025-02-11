@@ -43,9 +43,9 @@ class NoteService
         return $this->noteRepository->update($note, $noteData);
     }
 
-    public function deleteNote(Note $note)
+    public function deleteNote(int $noteId)
     {
-        $this->noteRepository->delete($note);
+        $this->noteRepository->delete($noteId);
 
         return response()->json(['message' => 'Note deleted successfully']);
     }

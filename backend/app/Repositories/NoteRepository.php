@@ -28,8 +28,8 @@ class NoteRepository
         return $note;
     }
 
-    public function delete(Note $note)
+    public function delete(int $noteId)
     {
-        $note->delete();
+        Note::where('id', $noteId)->delete();
     }
 }
