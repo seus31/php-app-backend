@@ -30,9 +30,13 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('API Token', ['*'], now()->addMinutes(60))->plainTextToken;
 
-        return response()->json(['access_token' => $token, 'token_type' => 'Bearer'], 201);
+        return response()->json([
+            'token_type' => 'Bearer',
+            'access_token' => $token,
+            'expires_at' => now()->addMinutes(60)
+        ], 201);
     }
 
     public function login(Request $request): JsonResponse
@@ -44,9 +48,13 @@ class AuthController extends Controller
 
         if (Auth::attempt($request->only('email', 'password'))) {
             $user = Auth::user();
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('API Token', ['*'], now()->addMinutes(60))->plainTextToken;
 
-            return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
+            return response()->json([
+                'token_type' => 'Bearer',
+                'access_token' => $token,
+                'expires_at' => now()->addMinutes(60)
+            ], 201);
         }
 
         return response()->json(['message' => 'The provided credentials are incorrect.'], 422);
@@ -61,5 +69,23 @@ class AuthController extends Controller
         } else {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
+    }
+
+    public function checkToken(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user || !$request->bearerToken()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        return response()->json([
+            'message' => 'Token is valid',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+        ]);
     }
 }
